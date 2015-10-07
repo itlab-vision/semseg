@@ -6,13 +6,14 @@
 % on augmented PASCAL VOC 2012 dataset
 
 % function [] = SBDataset2VOC(dataset_dir, output_dir, prefix, prefix1)
-% dataset_dir - directory contained the Semantic Boundaries Dataset
+% dataset_dir - directory containing the Semantic Boundaries Dataset
 % output_dir  - directory to put converted data
 % prefix      - which part of dataset to convert ('train' or 'val')
 % prefix1     - directory prefix ('cls', 'inst')
 function [] = SBDataset2VOC(dataset_dir, output_dir, prefix, prefix1)
 
 output_aug_folder_name = ['SegmentationClass_', prefix, '_aug_', prefix1];
+images_folder_name = 'img';
 output_path = fullfile(output_dir, output_aug_folder_name);
 if (exist(output_path, 'dir') ~= 7)
     mkdir(output_path);
@@ -71,8 +72,8 @@ for i = 1: dataset_list_length
     display(sprintf('%s.\n', getReport(exception)));    
   end
   
-  out_name = fullfile(output_aug_folder_name, sample_name);
-  fprintf(dataset_info, '%s %s\n', sample_name, out_name);
+  out_name = [output_aug_folder_name, '/', sample_name];
+  fprintf(dataset_info, '%s %s\n', ['/', images_folder_name, '/', sample_name, '.jpg'], ['/', out_name]);
 end
 display('Converting .mat to .png representation.');
 fclose(dataset_info);
