@@ -8,7 +8,7 @@
 % function [] = SBDataset2VOC(dataset_dir, output_dir, prefix)
 % dataset_dir - directory contained the Semantic Boundaries Dataset
 % output_dir  - directory to put converted data
-% prefix      - witch part of dataset to convert ('train' or 'val')
+% prefix      - which part of dataset to convert ('train' or 'val')
 function [] = SBDataset2VOC(dataset_dir, output_dir, prefix)
 
 output_aug_folder_name = ['SegmentationClass_', prefix, '_aug_inst'];
