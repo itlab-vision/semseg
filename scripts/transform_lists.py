@@ -1,3 +1,8 @@
+"""
+Script leaves only unique and existing files from data subsets
+"train_aug" and "trainval_aug" (eg val_aug)
+"""
+
 def readFileToSet(file_name, out):
 	list_all_file = open(file_name, "rb")
 	if (list_all_file == None):
