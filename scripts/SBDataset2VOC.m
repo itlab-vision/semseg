@@ -4,64 +4,68 @@
 
 % This script should be used for training DeepLab models
 % on augmented PASCAL VOC 2012 dataset
-function [] = SBDataset2VOC(dataset_dir)
-dataset_info_dir = '/inst';
-dataset_list_name = [dataset_dir, '/val.txt'];
 
-output_path = '/SegmentationValAug_inst';
-dataset_info_name = [dataset_dir, '/val_aug_inst.txt'];
+% function [] = SBDataset2VOC(dataset_dir, output_dir, prefix)
+% dataset_dir - directory contained the Semantic Boundaries Dataset
+% output_dir  - directory to put converted data
+% prefix      - witch part of dataset to convert ('train' or 'val')
+function [] = SBDataset2VOC(dataset_dir, output_dir, prefix)
 
+output_aug_folder_name = ['SegmentationCls_', prefix, '_aug_inst'];
+output_path = genpath(fullfile(output_dir, output_aug_folder_name));
+dataset_info_name = fullfile(output_dir, [prefix, '_aug_inst.txt']);
 
-
-
+% read dataset list
+display('---------------------------------------------------------');
+dataset_list_name = fullfile(dataset_dir, [prefix, '.txt']);
+display(sprintf('Reading dataset list %s...\n', dataset_list_name));
 dataset_list_fid = fopen(dataset_list_name, 'r');
-
 if (dataset_list_fid == -1)
-  printf('Error: Failed to load a file %s. Aborting.\n', dataset_list_name);
+  display(sprintf('Error: Failed to load a file %s. Aborting.\n', dataset_list_name));
   exit;
-endif
-
+end
 dataset_list = textscan(dataset_list_fid, '%s');
-
 fclose(dataset_list_fid);
-
 dataset_list_length = length(dataset_list{1});
-printf('Entries count: %d\n', dataset_list_length);
+display(sprintf('Entries count: %d.\n', dataset_list_length));
+display(sprintf('Reading dataset list %s.\n', dataset_list_name));
+display('---------------------------------------------------------');
 
+% open (and create if it doesn't exist) file for augmented information
 dataset_info = fopen(dataset_info_name, 'w+');
 if (dataset_info_name == -1)
-  printf('Error: Failed to create a file %s. Aborting.\n', dataset_info_name);
+  display(sprintf('Error: Failed to create a file %s. Aborting.\n', dataset_info_name));
   exit;
 end
 
-output_dir = [dataset_dir, output_path];
-
-for i = 1: dataset_list_length
+% list all samples and parse .mat-files
+display('Converting .mat- to .png-representation...');
+for i = 1: dataset_list_length  
   sample_name = dataset_list{1}{i};
-  img_info_name = [dataset_dir, dataset_info_dir, '/', sample_name, '.mat'];
+  display(sprintf('Process sample %s.\n', sample_name));
+  
+  img_info_name = fullfile(dataset_dir, 'inst', [sample_name, '.mat']);  
+  display(sprintf('Information file: %s.\n', img_info_name));
   try 
     load(img_info_name);
   catch exception
-    printf(getReport(exception));
-    printf('Error: File %s not found. Skipping.\n', img_info_name);
+    display(sprintf('%s.\n', getReport(exception)));
     continue;
   end
   
   img = GTinst.Segmentation;
     
-  try
-    out_img_name = [output_dir, '/', sample_name, '.png'];
+  out_img_name = fullfile(output_path, [sample_name, '.png']);
+  display(sprintf('Image file: %s.\n', out_img_name));
+  try    
     imwrite(img, out_img_name);
-    %printf("Image created successfully: '%s'.\n", out_img_name);
   catch exception
-    printf(getReport(exception));
-    printf('Error: Failed to write image %s\n', out_img_name);
+    display(sprintf('%s.\n', getReport(exception)));    
   end
   
-  out_name = [output_path, '/', sample_name];   
+  out_name = fullfile(output_aug_folder_name, sample_name);
   fprintf(dataset_info, '%s %s\n', sample_name, out_name);
 end
-
+display('Converting .mat to .png representation.');
 fclose(dataset_info);
-
-printf('Operation completed successfully!\n');
+display('---------------------------------------------------------');
