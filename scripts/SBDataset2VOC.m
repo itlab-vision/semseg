@@ -11,8 +11,11 @@
 % prefix      - witch part of dataset to convert ('train' or 'val')
 function [] = SBDataset2VOC(dataset_dir, output_dir, prefix)
 
-output_aug_folder_name = ['SegmentationCls_', prefix, '_aug_inst'];
-output_path = genpath(fullfile(output_dir, output_aug_folder_name));
+output_aug_folder_name = ['SegmentationClass_', prefix, '_aug_inst'];
+output_path = fullfile(output_dir, output_aug_folder_name);
+if (exist(output_path, 'dir') ~= 7)
+    mkdir(output_path);
+end
 dataset_info_name = fullfile(output_dir, [prefix, '_aug_inst.txt']);
 
 % read dataset list
@@ -39,7 +42,7 @@ if (dataset_info_name == -1)
 end
 
 % list all samples and parse .mat-files
-display('Converting .mat- to .png-representation...');
+display('Converting .mat to .png representation...');
 for i = 1: dataset_list_length  
   sample_name = dataset_list{1}{i};
   display(sprintf('Process sample %s.\n', sample_name));
