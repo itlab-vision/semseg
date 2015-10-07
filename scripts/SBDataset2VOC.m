@@ -5,18 +5,19 @@
 % This script should be used for training DeepLab models
 % on augmented PASCAL VOC 2012 dataset
 
-% function [] = SBDataset2VOC(dataset_dir, output_dir, prefix)
+% function [] = SBDataset2VOC(dataset_dir, output_dir, prefix, prefix1)
 % dataset_dir - directory contained the Semantic Boundaries Dataset
 % output_dir  - directory to put converted data
 % prefix      - which part of dataset to convert ('train' or 'val')
-function [] = SBDataset2VOC(dataset_dir, output_dir, prefix)
+% prefix1     - directory prefix ('cls', 'inst')
+function [] = SBDataset2VOC(dataset_dir, output_dir, prefix, prefix1)
 
-output_aug_folder_name = ['SegmentationClass_', prefix, '_aug_inst'];
+output_aug_folder_name = ['SegmentationClass_', prefix, '_aug_', prefix1];
 output_path = fullfile(output_dir, output_aug_folder_name);
 if (exist(output_path, 'dir') ~= 7)
     mkdir(output_path);
 end
-dataset_info_name = fullfile(output_dir, [prefix, '_aug_inst.txt']);
+dataset_info_name = fullfile(output_dir, [prefix, '_aug_', prefix1,'.txt']);
 
 % read dataset list
 display('---------------------------------------------------------');
@@ -47,16 +48,20 @@ for i = 1: dataset_list_length
   sample_name = dataset_list{1}{i};
   display(sprintf('Process sample %s.\n', sample_name));
   
-  img_info_name = fullfile(dataset_dir, 'inst', [sample_name, '.mat']);  
+  img_info_name = fullfile(dataset_dir, prefix1, [sample_name, '.mat']);  
   display(sprintf('Information file: %s.\n', img_info_name));
   try 
-    load(img_info_name);
+    load(img_info_name);    
   catch exception
     display(sprintf('%s.\n', getReport(exception)));
     continue;
   end
   
-  img = GTinst.Segmentation;
+  if (strcmp(prefix1, 'cls'))
+    img = GTcls.Segmentation;
+  else
+    img = GTinst.Segmentation;
+  end
     
   out_img_name = fullfile(output_path, [sample_name, '.png']);
   display(sprintf('Image file: %s.\n', out_img_name));
