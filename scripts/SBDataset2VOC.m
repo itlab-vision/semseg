@@ -26,7 +26,8 @@ dataset_list_name = fullfile(dataset_dir, [prefix, '.txt']);
 display(sprintf('Reading dataset list %s...\n', dataset_list_name));
 dataset_list_fid = fopen(dataset_list_name, 'r');
 if (dataset_list_fid == -1)
-  display(sprintf('Error: Failed to load a file %s. Aborting.\n', dataset_list_name));
+  display(sprintf('Error: Failed to load a file %s. Aborting.\n', ...
+                  dataset_list_name));
   exit;
 end
 dataset_list = textscan(dataset_list_fid, '%s');
@@ -39,13 +40,14 @@ display('---------------------------------------------------------');
 % open (and create if it doesn't exist) file for augmented information
 dataset_info = fopen(dataset_info_name, 'w+');
 if (dataset_info_name == -1)
-  display(sprintf('Error: Failed to create a file %s. Aborting.\n', dataset_info_name));
+  display(sprintf('Error: Failed to create a file %s. Aborting.\n', ...
+                  dataset_info_name));
   exit;
 end
 
 % list all samples and parse .mat-files
 display('Converting .mat to .png representation...');
-for i = 1: dataset_list_length  
+for i = 1 : dataset_list_length  
   sample_name = dataset_list{1}{i};
   display(sprintf('Process sample %s.\n', sample_name));
   
@@ -74,7 +76,8 @@ for i = 1: dataset_list_length
   end
   
   out_name = [output_aug_folder_name, '/', sample_name];
-  fprintf(dataset_info, '%s %s\n', ['/', images_folder_name, '/', sample_name, '.jpg'], ['/', out_name]);
+  fprintf(dataset_info, '%s %s\n', ...
+      ['/', images_folder_name, '/', sample_name, '.jpg'], ['/', out_name]);
 end
 display('Converting .mat to .png representation.');
 fclose(dataset_info);
