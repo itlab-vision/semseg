@@ -49,14 +49,14 @@ end
 display('Converting .mat to .png representation...');
 for i = 1 : dataset_list_length  
   sample_name = dataset_list{1}{i};
-  display(sprintf('Process sample %s.\n', sample_name));
+  display(sprintf('-----Process sample %s.-----', sample_name));
   
   img_info_name = fullfile(dataset_dir, prefix1, [sample_name, '.mat']);  
-  display(sprintf('Information file: %s.\n', img_info_name));
+  display(sprintf('Information file: %s.', img_info_name));
   try 
     load(img_info_name);    
   catch exception
-    display(sprintf('%s.\n', getReport(exception)));
+    display(sprintf('%s.', getReport(exception)));
     continue;
   end
   
@@ -67,16 +67,16 @@ for i = 1 : dataset_list_length
   end
     
   out_img_name = fullfile(output_path, [sample_name, '.png']);
-  display(sprintf('Image file: %s.\n', out_img_name));
+  display(sprintf('Image file: %s.', out_img_name));
   try
     img = SBDImage2VOC(GT);
     imwrite(img, out_img_name);
   catch exception
-    display(sprintf('%s.\n', getReport(exception)));    
+    display(sprintf('%s.', getReport(exception)));    
   end
   
   out_name = [output_aug_folder_name, '/', sample_name];
-  fprintf(dataset_info, '%s %s\n', ...
+  fprintf(dataset_info, '%s %s', ...
       ['/', images_folder_name, '/', sample_name, '.jpg'], ['/', out_name]);
 end
 display('Converting .mat to .png representation.');
