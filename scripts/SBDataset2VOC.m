@@ -59,14 +59,15 @@ for i = 1: dataset_list_length
   end
   
   if (strcmp(prefix1, 'cls'))
-    img = GTcls.Segmentation;
+    GT = GTcls;
   else
-    img = GTinst.Segmentation;
+    GT = GTinst;
   end
     
   out_img_name = fullfile(output_path, [sample_name, '.png']);
   display(sprintf('Image file: %s.\n', out_img_name));
-  try    
+  try
+    img = SBDImage2VOC(GT);
     imwrite(img, out_img_name);
   catch exception
     display(sprintf('%s.\n', getReport(exception)));    
