@@ -8,24 +8,23 @@
 function img = SBDImage2VOC(GT)
 
 % generate random colors for 20 object classes
-color_map = rand(20, 3);
+num_classes = 20;
+color_map = randi([0 255], num_classes, 3);
+% show colors for all classes
+% for i = 1 : num_classes
+%    display(sprintf('class_id = %d; color_id = (%d, %d, %d)', ...
+%                    i, color_map(i, 1), color_map(i, 2), color_map(i, 3)));
+% end
 
 % get full groundtruth information
-sgm = GT.Segmentation;
-cls = GT.Categories;
-bnd = GT.Boundaries;
-
-% prepare 3-channel image
-contours_r = zeros(size(sgm, 1), size(sgm, 2), 1);
-contours_g = zeros(size(sgm, 1), size(sgm, 2), 1);
-contours_b = zeros(size(sgm, 1), size(sgm, 2), 1);
-for i = 1 : length(bnd)
-   bnd_logical = bnd{i, 1};
-   color = color_map(cls(i), :); 
-   display(sprintf('class = %d; color = (%.4f %.4f %.4f)', ...
-                   cls(i), color(1), color(2), color(3)));
-   contours_r(bnd_logical) = color(1);
-   contours_g(bnd_logical) = color(2);
-   contours_b(bnd_logical) = color(3);   
+sgm = uint8(GT.Segmentation);
+img_r = uint8(zeros(size(sgm, 1), size(sgm, 2), 1));
+img_g = uint8(zeros(size(sgm, 1), size(sgm, 2), 1));
+img_b = uint8(zeros(size(sgm, 1), size(sgm, 2), 1));
+for i = 1 : num_classes    
+    indeces = (sgm == i);
+    img_r(indeces) = color_map(i, 1);
+    img_g(indeces) = color_map(i, 2);
+    img_b(indeces) = color_map(i, 3);
 end
-img = cat(3, contours_r, contours_g, contours_b);
+img = cat(3, img_r, img_g, img_b);

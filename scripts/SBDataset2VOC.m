@@ -47,7 +47,7 @@ end
 
 % list all samples and parse .mat-files
 display('Converting .mat to .png representation...');
-for i = 1 : dataset_list_length  
+for i = 1 : dataset_list_length
   sample_name = dataset_list{1}{i};
   display(sprintf('-----Process sample %s.-----', sample_name));
   
