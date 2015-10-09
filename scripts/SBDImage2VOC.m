@@ -27,42 +27,7 @@ color_contour = [255 255 255];
 bnds = GTinst.Boundaries;
 for i = 1 : length(bnds)
     bnd_logical = bnds{i, 1};
-    % draw contour
-    img_r(bnd_logical) = color_contour(1);
-    img_g(bnd_logical) = color_contour(2);
-    img_b(bnd_logical) = color_contour(3);
-    % shift and duplicate contour
-    bnd_logical_shift = circshift(bnd_logical, [-1 -1]);
-    img_r(bnd_logical_shift) = color_contour(1);
-    img_g(bnd_logical_shift) = color_contour(2);
-    img_b(bnd_logical_shift) = color_contour(3);
-    bnd_logical_shift = circshift(bnd_logical, [ 0 -1]);
-    img_r(bnd_logical_shift) = color_contour(1);
-    img_g(bnd_logical_shift) = color_contour(2);
-    img_b(bnd_logical_shift) = color_contour(3);
-    bnd_logical_shift = circshift(bnd_logical, [ 1 -1]);
-    img_r(bnd_logical_shift) = color_contour(1);
-    img_g(bnd_logical_shift) = color_contour(2);
-    img_b(bnd_logical_shift) = color_contour(3);
-    bnd_logical_shift = circshift(bnd_logical, [-1  0]);
-    img_r(bnd_logical_shift) = color_contour(1);
-    img_g(bnd_logical_shift) = color_contour(2);
-    img_b(bnd_logical_shift) = color_contour(3);
-    bnd_logical_shift = circshift(bnd_logical, [ 1  0]);
-    img_r(bnd_logical_shift) = color_contour(1);
-    img_g(bnd_logical_shift) = color_contour(2);
-    img_b(bnd_logical_shift) = color_contour(3);
-    bnd_logical_shift = circshift(bnd_logical, [-1  1]);
-    img_r(bnd_logical_shift) = color_contour(1);
-    img_g(bnd_logical_shift) = color_contour(2);
-    img_b(bnd_logical_shift) = color_contour(3);
-    bnd_logical_shift = circshift(bnd_logical, [ 0  1]);
-    img_r(bnd_logical_shift) = color_contour(1);
-    img_g(bnd_logical_shift) = color_contour(2);
-    img_b(bnd_logical_shift) = color_contour(3);
-    bnd_logical_shift = circshift(bnd_logical, [ 1  1]);
-    img_r(bnd_logical_shift) = color_contour(1);
-    img_g(bnd_logical_shift) = color_contour(2);
-    img_b(bnd_logical_shift) = color_contour(3);
+    [img_r, img_g, img_b] = ...
+        drawContours(img_r, img_g, img_b, bnd_logical, color_contour);
 end
 img = cat(3, img_r, img_g, img_b);
