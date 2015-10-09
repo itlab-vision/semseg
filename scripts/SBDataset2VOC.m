@@ -59,12 +59,10 @@ for i = 1 : dataset_list_length
     continue;
   end
   
-  GT = GTcls;
-  
   out_img_name = fullfile(output_path, [sample_name, '.png']);
   display(sprintf('Image file: %s.', out_img_name));
   try
-    img = SBDImage2VOC(GT);
+    img = SBDImage2VOC(GTcls);
     imwrite(img, out_img_name);
   catch exception
     display(sprintf('%s.', getReport(exception)));    
