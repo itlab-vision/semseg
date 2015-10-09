@@ -2,6 +2,7 @@
 % num_classes - number of classes to fill segments
 % color_map   - color list ( size = [num_classes x 3])
 function color_map = generateSgmColors(num_classes)
+
 color_map = randi([0 255], num_classes, 3);
 % show colors for all classes
 for i = 1 : num_classes
