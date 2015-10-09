@@ -2,22 +2,16 @@
 % http://www.cs.berkeley.edu/~bharath2/codes/SBD/download.html
 % to PASCAL VOC format
 
-% function img = SBDImage2VOC(GT)
-% GT  - Semantic Boundaries Dataset groundtruth
-% img - segmented image in PASCAL VOC format
-function img = SBDImage2VOC(GT)
+% function img = SBDImage2VOC(GTcls, GTinst)
+% GTcls       - Semantic Boundaries Dataset classes groundtruth
+% GTinst      - Semantic Boundaries Dataset boundaries groundtruth
+% img         - segmented image in PASCAL VOC format
+% num_classes - number of semantic classes
+% color_map   - generated color map for semantic classes
+function img = SBDImage2VOC(GTcls, GTinst, num_classes, color_map)
 
-% generate random colors for 20 object classes
-num_classes = 20;
-color_map = randi([0 255], num_classes, 3);
-% show colors for all classes
-% for i = 1 : num_classes
-%    display(sprintf('class_id = %d; color_id = (%d, %d, %d)', ...
-%                    i, color_map(i, 1), color_map(i, 2), color_map(i, 3)));
-% end
-
-% get full groundtruth information
-sgm = uint8(GT.Segmentation);
+% prepare segmented image
+sgm = uint8(GTcls.Segmentation);
 img_r = uint8(zeros(size(sgm, 1), size(sgm, 2), 1));
 img_g = uint8(zeros(size(sgm, 1), size(sgm, 2), 1));
 img_b = uint8(zeros(size(sgm, 1), size(sgm, 2), 1));
@@ -26,5 +20,49 @@ for i = 1 : num_classes
     img_r(indeces) = color_map(i, 1);
     img_g(indeces) = color_map(i, 2);
     img_b(indeces) = color_map(i, 3);
+end
+
+% draw contours on the segmented image
+color_contour = [255 255 255];
+bnds = GTinst.Boundaries;
+for i = 1 : length(bnds)
+    bnd_logical = bnds{i, 1};
+    % draw contour
+    img_r(bnd_logical) = color_contour(1);
+    img_g(bnd_logical) = color_contour(2);
+    img_b(bnd_logical) = color_contour(3);
+    % shift and duplicate contour
+    bnd_logical_shift = circshift(bnd_logical, [-1 -1]);
+    img_r(bnd_logical_shift) = color_contour(1);
+    img_g(bnd_logical_shift) = color_contour(2);
+    img_b(bnd_logical_shift) = color_contour(3);
+    bnd_logical_shift = circshift(bnd_logical, [ 0 -1]);
+    img_r(bnd_logical_shift) = color_contour(1);
+    img_g(bnd_logical_shift) = color_contour(2);
+    img_b(bnd_logical_shift) = color_contour(3);
+    bnd_logical_shift = circshift(bnd_logical, [ 1 -1]);
+    img_r(bnd_logical_shift) = color_contour(1);
+    img_g(bnd_logical_shift) = color_contour(2);
+    img_b(bnd_logical_shift) = color_contour(3);
+    bnd_logical_shift = circshift(bnd_logical, [-1  0]);
+    img_r(bnd_logical_shift) = color_contour(1);
+    img_g(bnd_logical_shift) = color_contour(2);
+    img_b(bnd_logical_shift) = color_contour(3);
+    bnd_logical_shift = circshift(bnd_logical, [ 1  0]);
+    img_r(bnd_logical_shift) = color_contour(1);
+    img_g(bnd_logical_shift) = color_contour(2);
+    img_b(bnd_logical_shift) = color_contour(3);
+    bnd_logical_shift = circshift(bnd_logical, [-1  1]);
+    img_r(bnd_logical_shift) = color_contour(1);
+    img_g(bnd_logical_shift) = color_contour(2);
+    img_b(bnd_logical_shift) = color_contour(3);
+    bnd_logical_shift = circshift(bnd_logical, [ 0  1]);
+    img_r(bnd_logical_shift) = color_contour(1);
+    img_g(bnd_logical_shift) = color_contour(2);
+    img_b(bnd_logical_shift) = color_contour(3);
+    bnd_logical_shift = circshift(bnd_logical, [ 1  1]);
+    img_r(bnd_logical_shift) = color_contour(1);
+    img_g(bnd_logical_shift) = color_contour(2);
+    img_b(bnd_logical_shift) = color_contour(3);
 end
 img = cat(3, img_r, img_g, img_b);

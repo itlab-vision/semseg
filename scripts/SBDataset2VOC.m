@@ -11,6 +11,10 @@
 % prefix      - which part of dataset to convert ('train' or 'val')
 function [] = SBDataset2VOC(dataset_dir, output_dir, prefix)
 
+% generate color map for the set of semantic classes
+num_classes = 20;
+color_map = generateSgmColors(num_classes);
+
 output_aug_folder_name = ['SegmentationClass_', prefix, '_aug_cls'];
 images_folder_name = 'img';
 output_path = fullfile(output_dir, output_aug_folder_name);
@@ -22,24 +26,24 @@ dataset_info_name = fullfile(output_dir, [prefix, '_aug_cls.txt']);
 % read dataset list
 display('---------------------------------------------------------');
 dataset_list_name = fullfile(dataset_dir, [prefix, '.txt']);
-display(sprintf('Reading dataset list %s...\n', dataset_list_name));
+display(sprintf('Reading dataset list %s...', dataset_list_name));
 dataset_list_fid = fopen(dataset_list_name, 'r');
 if (dataset_list_fid == -1)
-  display(sprintf('Error: Failed to load a file %s. Aborting.\n', ...
+  display(sprintf('Error: Failed to load a file %s. Aborting.', ...
                   dataset_list_name));
   exit;
 end
 dataset_list = textscan(dataset_list_fid, '%s');
 fclose(dataset_list_fid);
 dataset_list_length = length(dataset_list{1});
-display(sprintf('Entries count: %d.\n', dataset_list_length));
-display(sprintf('Reading dataset list %s.\n', dataset_list_name));
+display(sprintf('Entries count: %d.', dataset_list_length));
+display(sprintf('Reading dataset list %s.', dataset_list_name));
 display('---------------------------------------------------------');
 
 % open (and create if it doesn't exist) file for augmented information
 dataset_info = fopen(dataset_info_name, 'w+');
 if (dataset_info_name == -1)
-  display(sprintf('Error: Failed to create a file %s. Aborting.\n', ...
+  display(sprintf('Error: Failed to create a file %s. Aborting.', ...
                   dataset_info_name));
   exit;
 end
@@ -49,11 +53,20 @@ display('Converting .mat to .png representation...');
 for i = 1 : dataset_list_length
   sample_name = dataset_list{1}{i};
   display(sprintf('-----Process sample %s.-----', sample_name));
-  
-  img_info_name = fullfile(dataset_dir, 'cls', [sample_name, '.mat']);  
-  display(sprintf('Information file: %s.', img_info_name));
+  % load 'cls' information
+  img_cls_info_name = fullfile(dataset_dir, 'cls', [sample_name, '.mat']);  
+  display(sprintf('Information file: %s.', img_cls_info_name));
   try 
-    load(img_info_name);    
+    load(img_cls_info_name);    
+  catch exception
+    display(sprintf('%s.', getReport(exception)));
+    continue;
+  end
+  % load 'inst' information
+  img_inst_info_name = fullfile(dataset_dir, 'inst', [sample_name, '.mat']);  
+  display(sprintf('Information file: %s.', img_inst_info_name));
+  try 
+    load(img_inst_info_name);    
   catch exception
     display(sprintf('%s.', getReport(exception)));
     continue;
@@ -62,7 +75,7 @@ for i = 1 : dataset_list_length
   out_img_name = fullfile(output_path, [sample_name, '.png']);
   display(sprintf('Image file: %s.', out_img_name));
   try
-    img = SBDImage2VOC(GTcls);
+    img = SBDImage2VOC(GTcls, GTinst, num_classes, color_map);
     imwrite(img, out_img_name);
   catch exception
     display(sprintf('%s.', getReport(exception)));    
