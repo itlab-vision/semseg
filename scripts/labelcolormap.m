@@ -5,9 +5,6 @@
 % CMAP = VOCLABELCOLORMAP(N) creates a label color map with N entries.
 function cmap = labelcolormap(N)
 
-if nargin==0
-    N=256
-end
 cmap = zeros(N,3);
 for i=1:N
     id = i-1; r=0;g=0;b=0;
