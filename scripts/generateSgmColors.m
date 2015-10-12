@@ -3,6 +3,7 @@
 % color_map   - color list ( size = [num_classes x 3])
 function color_map = generateSgmColors(num_classes)
 
+% call function 'labelcolormap' from PASCAL VOC Devkit
 color_map = labelcolormap(num_classes);
 % show colors for all classes
 for i = 1 : num_classes
