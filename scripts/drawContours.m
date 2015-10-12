@@ -7,10 +7,7 @@
 % color_contour - color of all contours
 function [img_r, img_g, img_b] = drawContours(img_r, img_g, img_b, ...
                                               bnd_logical, color_contour)
-% draw contour
-img_r(bnd_logical) = color_contour(1);
-img_g(bnd_logical) = color_contour(2);
-img_b(bnd_logical) = color_contour(3);
+
 
 % 5 x 5 pixels for contour
 shifts = [-2 -1 0 1 2];
