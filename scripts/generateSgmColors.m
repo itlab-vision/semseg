@@ -3,7 +3,7 @@
 % color_map   - color list ( size = [num_classes x 3])
 function color_map = generateSgmColors(num_classes)
 
-color_map = randi([0 255], num_classes, 3);
+color_map = labelcolormap(num_classes);
 % show colors for all classes
 for i = 1 : num_classes
     display(sprintf('class_id = %d; color_id = (%d, %d, %d)', ...
