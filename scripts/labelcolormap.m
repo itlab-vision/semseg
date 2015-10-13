@@ -1,3 +1,6 @@
+% This original function in PASCAL VOC Devkit 
+% [http://host.robots.ox.ac.uk:8080/pascal/VOC/voc2012/index.html#devkit]
+
 % VOCLABELCOLORMAP Creates a label color map such that adjacent indices have different
 % colors.  Useful for reading and writing index images which contain large indices,
 % by encoding them as RGB images.
@@ -16,4 +19,3 @@ for i=1:N
     end
     cmap(i,1)=r; cmap(i,2)=g; cmap(i,3)=b;
 end
-cmap = cmap / 255;
