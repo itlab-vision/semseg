@@ -14,30 +14,7 @@ def show_help():
 
 
 class SegmentationResultsProcessor:
-	Classes = [
-		'background',
-		'aeroplane',
-		'bicycle',
-		'bird',
-		'boat',
-		'bottle',
-		'bus',
-		'car',
-		'cat',
-		'chair',
-		'cow',
-		'diningtable',
-		'dog',
-		'horse',
-		'motorbike',
-		'person',
-		'pottedplant',
-		'sheep',
-		'sofa',
-		'train',
-		'tvmonitor'
-	]
-
+	Classes = []
 	results_directory = None
 	gt_directory = None
 	list_path = None
@@ -83,12 +60,11 @@ class SegmentationResultsProcessor:
 		IoUs = [(0, 0, 0)] * len(self.Classes) # (intersection, union, class presence)
 		
 		image = Image.open(image_path)
-		image = image.convert('L') # grayscale
+		image = image.convert('P') # grayscale
 		self.check_segmentation(image)
 
 		gt = Image.open(gt_path)
 		gt = gt.convert('P') # palette-based
-		gt = gt.point(lambda p: (p < 255) * p)
 		self.check_segmentation(gt)
 
 		if (image.width != gt.width or image.height != gt.height):
@@ -124,15 +100,15 @@ class SegmentationResultsProcessor:
 				classes_metrics[i][0] += current_metrics[i][0]
 				classes_metrics[i][1] += current_metrics[i][1]
 
-		overall_classes_presented = 0
 		classes_IoU = [0.0] * len(self.Classes)
 		for i in range(len(self.Classes)):
 			if (0 < classes_metrics[i][1]):
 				classes_IoU[i] = classes_metrics[i][0] / classes_metrics[i][1]
-				overall_classes_presented += 1
 
+		overall_classes_presented = 0
 		overall_accuracy = 0.0
-		for i in range(1, len(self.Classes)):				
+		for i in range(1, len(self.Classes)):
+			overall_classes_presented += (0 < classes_metrics[i][1])
 			overall_accuracy += classes_IoU[i]
 
 		if (0 < overall_classes_presented):
@@ -160,5 +136,28 @@ if (__name__ == '__main__'):
 	processor.results_directory = os.path.abspath(sys.argv[1])
 	processor.gt_directory = os.path.abspath(sys.argv[2])
 	processor.list_path = os.path.abspath(sys.argv[3])
+	processor.Classes = [
+		'background',
+		'aeroplane',
+		'bicycle',
+		'bird',
+		'boat',
+		'bottle',
+		'bus',
+		'car',
+		'cat',
+		'chair',
+		'cow',
+		'diningtable',
+		'dog',
+		'horse',
+		'motorbike',
+		'person',
+		'pottedplant',
+		'sheep',
+		'sofa',
+		'train',
+		'tvmonitor'
+	]
 	processor.process()
 	processor.show_results()
