@@ -47,30 +47,29 @@ class SegmentationResultsProcessor:
 		assert(image.mode in ['1', 'L', 'P'])
 		assert(gt.mode in ['1', 'L', 'P'])
 		
-		image_mask = image.point(lambda p: (p == class_index) * 255)
-		gt_mask = gt.point(lambda p: (p == class_index) * 255)
+		image_mask = image.point(lambda p: (p == class_index) and 255)
+		image_mask = image_mask.convert('1')
+		
+		gt_mask = gt.point(lambda p: (p == class_index) and 255)
 		gt_mask = gt_mask.convert('1')
 
 		intersection = Image.new('1', image.size, 0)
 		intersection.paste(image_mask, gt_mask)
 
 		stat = ImageStat.Stat(intersection)
-		intersection_count = stat.sum[0] / 255
+		intersection_count = stat.sum[0]
 
 		stat = ImageStat.Stat(image_mask)
-		image_count = stat.sum[0] / 255
+		image_count = stat.sum[0]
 
 		stat = ImageStat.Stat(gt_mask)
-		gt_count = stat.sum[0] / 255
+		gt_count = stat.sum[0]
 
 		union_count = image_count + gt_count - intersection_count
-		IoU = 0
-		if (union_count != 0):
-			IoU = intersection_count / union_count
-
+		
 		presence = (gt_count != 0)
 
-		return (IoU, presence)
+		return (intersection_count, union_count, presence)
 
 
 	def check_segmentation(self, image):
@@ -83,15 +82,15 @@ class SegmentationResultsProcessor:
 
 
 	def process_image(self, image_path, gt_path):
-		IoUs = [(0.0, 0)] * len(self.Classes) # (IoU, class presence)
+		IoUs = [(0, 0, 0)] * len(self.Classes) # (IoU, class presence)
 		
 		image = Image.open(image_path)
-		image = image.convert('L') # grayscale
+		image = image.convert('P') # grayscale
 		self.check_segmentation(image)
 
 		gt = Image.open(gt_path)
 		gt = gt.convert('P') # palette-based
-		gt = gt.point(lambda p: (p < 255) * p)
+		#gt = gt.point(lambda p: (p < 255) and p)
 		self.check_segmentation(gt)
 
 		if (image.width != gt.width or image.height != gt.height):
@@ -111,8 +110,8 @@ class SegmentationResultsProcessor:
 		if (self.list_path == None):
 			raise Exception('Images list path is not set')
 
-		files_count = 0
-		classes_metrics = [0.0] * len(self.Classes)
+		classes_intersection = [0] * len(self.Classes)
+		classes_union = [0] * len(self.Classes)
 		classes_presented = [0] * len(self.Classes)
 		
 		images_list = open(self.list_path, 'r')
@@ -126,21 +125,22 @@ class SegmentationResultsProcessor:
 
 			current_metrics = self.process_image(result_filepath, gt_filepath)
 			for i in range(len(self.Classes)):
-				classes_metrics[i] += current_metrics[i][0]
-				classes_presented[i] += current_metrics[i][1]
+				classes_intersection[i] += current_metrics[i][0]
+				classes_union[i] += current_metrics[i][1]
+				classes_presented[i] += current_metrics[i][2]
 
-			files_count += 1
 
-
+		classes_metrics = [0] * len(self.Classes)
 		overall_accuracy = 0.0
 		overall_classes_presented = 0
 		for i in range(len(self.Classes)):
 			if (0 < classes_presented[i]):
-				classes_metrics[i] /= classes_presented[i]
+				classes_metrics[i] = classes_intersection[i] / classes_union[i]
 
 		for i in range(1, len(self.Classes)):				
 			overall_classes_presented += (classes_presented[i] != 0)
-			overall_accuracy += classes_metrics[i]
+			if (0 < classes_presented[i]):
+				overall_accuracy += classes_metrics[i]
 
 		if (0 < overall_classes_presented):
 			overall_accuracy /= overall_classes_presented
