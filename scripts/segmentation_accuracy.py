@@ -6,7 +6,7 @@ Usage: python segmentation_accuracy.py segmentation/dir gt/dir images_list.txt
 from PIL import Image, ImageStat
 import sys
 import os
-
+import numpy
 
 
 def show_help():
@@ -46,29 +46,47 @@ class SegmentationResultsProcessor:
 	def calculate_image_IoU(self, image, gt, class_index):
 		assert(image.mode in ['1', 'L', 'P'])
 		assert(gt.mode in ['1', 'L', 'P'])
+
+		unknown_label_mask = gt.point(lambda p: (p < 255) and 255)
+		unknown_label_mask = unknown_label_mask.convert('1')
+		#unknown_label_mask.show()
 		
 		image_mask = image.point(lambda p: (p == class_index) and 255)
-		image_mask = image_mask.convert('1')
-		
+		image_mask_array = 1 * (numpy.asarray(image_mask) == 255)
+		#image_mask.show()
+						
 		gt_mask = gt.point(lambda p: (p == class_index) and 255)
-		gt_mask = gt_mask.convert('1')
+		gt_mask_array = 1 * (numpy.asarray(gt_mask) == 255)
+		#gt_mask.show()
+		
+		intersection = Image.new('L', image.size, 0)
+		intersection.paste(image_mask, gt_mask.convert('1'))
+		intersection_array = 1 * (numpy.asarray(intersection) == 255)		
+		intersection_count = intersection_array.sum()
+		#intersection.show()
+		print("intersection_count = ", intersection_count)
+		
+		image_mask_new = Image.new('L', image.size, 0)
+		image_mask_new.paste(image_mask, unknown_label_mask)
+		image_mask_new_array = 1 * (numpy.asarray(image_mask_new) == 255)
+		image_count = image_mask_new_array.sum()
+		#image_mask_new.show()
+		print("image_count = ", image_count)
+		
+		gt_mask_new = Image.new('L', image.size, 0)
+		gt_mask_new.paste(gt_mask, unknown_label_mask)
+		gt_mask_new_array = 1 * (numpy.asarray(gt_mask_new) == 255)
+		gt_count = gt_mask_new_array.sum()
+		#gt_mask_new.show()
+		print("gt_count = ", gt_count)
 
-		intersection = Image.new('1', image.size, 0)
-		intersection.paste(image_mask, gt_mask)
-
-		stat = ImageStat.Stat(intersection)
-		intersection_count = stat.sum[0]
-
-		stat = ImageStat.Stat(image_mask)
-		image_count = stat.sum[0]
-
-		stat = ImageStat.Stat(gt_mask)
-		gt_count = stat.sum[0]
+		#input("Press Enter to continue...")
 
 		union_count = image_count + gt_count - intersection_count
 		
 		presence = (gt_count != 0)
-
+		print("presence = ", presence)
+		
 		return (intersection_count, union_count, presence)
 
 
@@ -82,15 +100,16 @@ class SegmentationResultsProcessor:
 
 
 	def process_image(self, image_path, gt_path):
-		IoUs = [(0, 0, 0)] * len(self.Classes) # (IoU, class presence)
+		IoUs = [(0, 0, 0)] * len(self.Classes)
 		
 		image = Image.open(image_path)
-		image = image.convert('P') # grayscale
+		image = image.convert('L')
 		self.check_segmentation(image)
 
 		gt = Image.open(gt_path)
-		gt = gt.convert('P') # palette-based
+		gt = gt.convert('L')
 		#gt = gt.point(lambda p: (p < 255) and p)
+		#gt.show()
 		self.check_segmentation(gt)
 
 		if (image.width != gt.width or image.height != gt.height):
@@ -137,11 +156,12 @@ class SegmentationResultsProcessor:
 			if (0 < classes_presented[i]):
 				classes_metrics[i] = classes_intersection[i] / classes_union[i]
 
-		for i in range(1, len(self.Classes)):				
+		for i in range(0, len(self.Classes)):				
 			overall_classes_presented += (classes_presented[i] != 0)
 			if (0 < classes_presented[i]):
 				overall_accuracy += classes_metrics[i]
 
+		print("overall_classes_presented = ", overall_classes_presented)
 		if (0 < overall_classes_presented):
 			overall_accuracy /= overall_classes_presented
 
