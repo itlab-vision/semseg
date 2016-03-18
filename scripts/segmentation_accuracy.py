@@ -49,43 +49,40 @@ class SegmentationResultsProcessor:
 
 		unknown_label_mask = gt.point(lambda p: (p < 255) and 255)
 		unknown_label_mask = unknown_label_mask.convert('1')
-		#unknown_label_mask.show()
+		unknown_label_mask.show()
 		
 		image_mask = image.point(lambda p: (p == class_index) and 255)
-		image_mask_array = 1 * (numpy.asarray(image_mask) == 255)
-		#image_mask.show()
+		image_mask.show()
 						
 		gt_mask = gt.point(lambda p: (p == class_index) and 255)
 		gt_mask_array = 1 * (numpy.asarray(gt_mask) == 255)
-		#gt_mask.show()
+		gt_mask.show()
 		
 		intersection = Image.new('L', image.size, 0)
 		intersection.paste(image_mask, gt_mask.convert('1'))
 		intersection_array = 1 * (numpy.asarray(intersection) == 255)		
 		intersection_count = intersection_array.sum()
-		#intersection.show()
+		intersection.show()
 		print("intersection_count = ", intersection_count)
 		
 		image_mask_new = Image.new('L', image.size, 0)
 		image_mask_new.paste(image_mask, unknown_label_mask)
-		image_mask_new_array = 1 * (numpy.asarray(image_mask_new) == 255)
-		image_count = image_mask_new_array.sum()
-		#image_mask_new.show()
+		image_mask_array = 1 * (numpy.asarray(image_mask_new) == 255)
+		image_count = image_mask_array.sum()
+		image_mask_new.show()
 		print("image_count = ", image_count)
 		
-		gt_mask_new = Image.new('L', image.size, 0)
-		gt_mask_new.paste(gt_mask, unknown_label_mask)
-		gt_mask_new_array = 1 * (numpy.asarray(gt_mask_new) == 255)
-		gt_count = gt_mask_new_array.sum()
-		#gt_mask_new.show()
-		print("gt_count = ", gt_count)
-
-		#input("Press Enter to continue...")
+		gt_mask_array = 1 * (numpy.asarray(gt_mask.convert('L')) == 255)
+		gt_count = gt_mask_array.sum()
+		print("gt_count = ", gt_count)		
 
 		union_count = image_count + gt_count - intersection_count
+		print("union_count = ", union_count)
 		
 		presence = (gt_count != 0)
 		print("presence = ", presence)
+
+		input("Press Enter to continue...")
 		
 		return (intersection_count, union_count, presence)
 
@@ -93,8 +90,8 @@ class SegmentationResultsProcessor:
 	def check_segmentation(self, image):
 		assert(image.mode in ['1', 'L', 'P'])
 		image_mask = image.point(lambda p: (len(self.Classes) <= p) and (p < 255))
-		stat = ImageStat.Stat(image_mask)
 
+		stat = ImageStat.Stat(image_mask)
 		if (0 < stat.sum[0]):
 			raise Exception('Image has an unexpected class index')
 
@@ -108,8 +105,6 @@ class SegmentationResultsProcessor:
 
 		gt = Image.open(gt_path)
 		gt = gt.convert('L')
-		#gt = gt.point(lambda p: (p < 255) and p)
-		#gt.show()
 		self.check_segmentation(gt)
 
 		if (image.width != gt.width or image.height != gt.height):
@@ -156,7 +151,7 @@ class SegmentationResultsProcessor:
 			if (0 < classes_presented[i]):
 				classes_metrics[i] = classes_intersection[i] / classes_union[i]
 
-		for i in range(0, len(self.Classes)):				
+		for i in range(1, len(self.Classes)):				
 			overall_classes_presented += (classes_presented[i] != 0)
 			if (0 < classes_presented[i]):
 				overall_accuracy += classes_metrics[i]
