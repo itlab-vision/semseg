@@ -86,11 +86,11 @@ class SegmentationResultsProcessor:
 			maskedsumim = numpy.extract(locs, sumim)
 			[hs, bin_edges] = numpy.histogram(maskedsumim, bins = range(1, len(self.Classes) * len(self.Classes) + 2))
 			# confcounts(:) = confcounts(:) + hs(:);
-			confcounts += numpy.reshape(hs[0], (len(self.Classes), len(self.Classes)))
+			confcounts += numpy.reshape(hs, (len(self.Classes), len(self.Classes)))
 
 		# conf = 100*confcounts./repmat(1E-20 + sum(confcounts,2), [1 size(confcounts,2)]);
 		conf = 100 * numpy.divide(confcounts, numpy.repeat(
-                    numpy.sum(confcounts, axis = 1)[:, numpy.newaxis], len(self.Classes), 1))
+                    numpy.sum(confcounts, axis = 1)[:, numpy.newaxis], len(self.Classes), 1) + 1E-20)
 		# overall_acc = 100*sum(diag(confcounts)) / sum(confcounts(:));
 		self.overall_accuracy = 100 * numpy.sum(numpy.diagonal(confcounts)) / numpy.sum(confcounts)
 		
