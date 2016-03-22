@@ -93,12 +93,24 @@ class SegmentationResultsProcessor:
                     numpy.sum(confcounts, axis = 1)[:, numpy.newaxis], len(self.Classes), 1) + 1E-20)
 		# overall_acc = 100*sum(diag(confcounts)) / sum(confcounts(:));
 		self.overall_accuracy = 100 * numpy.sum(numpy.diagonal(confcounts)) / numpy.sum(confcounts)
-		
+
+		self.class_acc = numpy.zeros(len(self.Classes))
+		denoms = numpy.sum(confcounts, axis = 0)
+		for i in range(0, len(self.Classes)):
+                        # denom = sum(confcounts(i, :)) в denoms
+                        if (denoms[i] == 0):
+                                denoms[i] = 1
+                        # class_acc(i) = 100 * confcounts(i, i) / denom;
+                        self.class_acc[i] = 100 * confcounts[i][i] / denoms[i]                	
 		
 
 	def show_results(self):
 		print('Segmentation accuracy (IoU metric)')
 		print('Overall accuracy: %6.3f%%' % self.overall_accuracy)
+		print('Per class accuracy:')
+		for i in range(len(self.Classes)):
+			print('  %14s: %6.3f%%' % \
+				(self.Classes[i] , self.class_acc[i]) )
 
 
 if (__name__ == '__main__'):
