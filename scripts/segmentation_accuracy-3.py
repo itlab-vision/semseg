@@ -75,7 +75,7 @@ class SegmentationResultsProcessor:
 			# load segmentation image
 			resim = numpy.asarray(Image.open(result_filepath).convert('L')).astype(float)
 			
-			if (resim.shape[0] != resim.shape[0] or resim.shape[1] != resim.shape[1]):
+			if (resim.shape[0] != gtim.shape[0] or resim.shape[1] != gtim.shape[1]):
 				raise Exception("Image sizes are different") 
 
 			# sumim = 1 + gtim + resim * num;
