@@ -94,6 +94,7 @@ class SegmentationResultsProcessor:
 		# overall_acc = 100*sum(diag(confcounts)) / sum(confcounts(:));
 		self.overall_accuracy = 100 * numpy.sum(numpy.diagonal(confcounts)) / numpy.sum(confcounts)
 
+                # class accuracy
 		self.class_acc = numpy.zeros(len(self.Classes))
 		denoms = numpy.sum(confcounts, axis = 0)
 		for i in range(0, len(self.Classes)):
@@ -101,16 +102,43 @@ class SegmentationResultsProcessor:
                         if (denoms[i] == 0):
                                 denoms[i] = 1
                         # class_acc(i) = 100 * confcounts(i, i) / denom;
-                        self.class_acc[i] = 100 * confcounts[i][i] / denoms[i]                	
+                        self.class_acc[i] = 100 * confcounts[i][i] / denoms[i]
+		self.aver_class_acc = numpy.sum(self.class_acc) / len(self.Classes)
+
+		# pixel IoU
+		self.accuracies = numpy.zeros(len(self.Classes))
+		gtj = numpy.sum(confcounts, axis = 1)
+		resj = numpy.sum(confcounts, axis = 0)
+		for j in range(0, len(self.Classes)):
+                        # gtj=sum(confcounts(j,:)) в gtj
+                        # resj=sum(confcounts(:,j)) в resj
+                        # gtjresj=confcounts(j,j);
+                        gtjresj = confcounts[j][j]
+                        # denom = (gtj+resj-gtjresj);
+                        denom = gtj[j] + resj[j] - gtjresj
+                        if (denom == 0):
+                                denom = 1
+                        # accuracies(j)=100*gtjresj/denom;
+                        self.accuracies[j] = 100 * gtjresj / denom
+		self.aver_accuracy = numpy.sum(self.accuracies) / len(self.Classes)
 		
 
-	def show_results(self):
-		print('Segmentation accuracy (IoU metric)')
-		print('Overall accuracy: %6.3f%%' % self.overall_accuracy)
+	def show_results(self):		
+		print('----------------------------------')
+		print('Percentage of pixels correctly labelled overall: %6.3f%%' % self.overall_accuracy)
+		print('----------------------------------')
+		print('Mean Class Accuracy:: %6.3f%%' % self.aver_class_acc)
 		print('Per class accuracy:')
 		for i in range(len(self.Classes)):
 			print('  %14s: %6.3f%%' % \
 				(self.Classes[i] , self.class_acc[i]) )
+		print('----------------------------------')
+		print('Average accuracy: %6.3f%%' % self.aver_accuracy)
+		print('Accuracy for each class (intersection/union measure)')
+		for i in range(len(self.Classes)):
+			print('  %14s: %6.3f%%' % \
+				(self.Classes[i] , self.accuracies[i]) )
+		print('----------------------------------')
 
 
 if (__name__ == '__main__'):
