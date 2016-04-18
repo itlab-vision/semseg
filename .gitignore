@@ -1,0 +1,7 @@
+labeling-system/classify/build
+labeling-system/classify/result
+labeling-system/out*.txt
+labeling-system/classify/out.txt
+labeling-system/framer/build
+labeling-system/framer/frames
+labeling-system/models/*.caffemodel
